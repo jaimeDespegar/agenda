@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import modelo.Agenda;
 import presentacion.reportes.ReporteAgenda;
 import presentacion.vista.VentanaPersona;
@@ -18,6 +20,7 @@ public class Controlador implements ActionListener
 		private VentanaPersona ventanaPersona; 
 		private Agenda agenda;
 		private Map<Object, Runnable> mapaAcciones;
+		private Logger log = LoggerFactory.getLogger(Controlador.class);
 		
 		public Controlador(Vista vista, Agenda agenda)
 		{
@@ -33,7 +36,7 @@ public class Controlador implements ActionListener
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
-			this.mapaAcciones.getOrDefault(e.getSource(), () -> System.out.println("No existe ninguna acciona asociada a este evento!"))
+			this.mapaAcciones.getOrDefault(e.getSource(), () -> log.warn("No existe ninguna acciona asociada a este evento!"))
 							 .run();
 		}
 		
