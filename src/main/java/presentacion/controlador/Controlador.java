@@ -2,7 +2,9 @@ package presentacion.controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import modelo.Agenda;
 import presentacion.reportes.ReporteAgenda;
 import presentacion.vista.VentanaPersona;
@@ -15,6 +17,7 @@ public class Controlador implements ActionListener
 		private List<PersonaDTO> personas_en_tabla;
 		private VentanaPersona ventanaPersona; 
 		private Agenda agenda;
+		private Map<Object, Runnable> mapaAcciones;
 		
 		public Controlador(Vista vista, Agenda agenda)
 		{
@@ -24,13 +27,29 @@ public class Controlador implements ActionListener
 			this.vista.getBtnReporte().addActionListener(this);
 			this.agenda = agenda;
 			this.personas_en_tabla = null;
+			this.mapaAcciones = new HashMap<>();
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) 
+		{
+			this.mapaAcciones.getOrDefault(e.getSource(), () -> System.out.println("No existe ninguna acciona asociada a este evento!"))
+							 .run();
 		}
 		
 		public void inicializar() {
 			this.llenarTabla();
+			this.cargarAcciones();
 			this.vista.show();
 		}
 		
+		private void cargarAcciones() 
+		{
+			this.mapaAcciones.put(this.vista.getBtnAgregar(), () -> this.abrirVentanaPersonaNueva());
+			this.mapaAcciones.put(this.vista.getBtnBorrar(), () -> this.borrarPersonas());
+			this.mapaAcciones.put(this.vista.getBtnReporte(), () -> this.generarReporte());
+		}
+
 		private void llenarTabla()
 		{
 			this.vista.vaciarTablaPersonas();
@@ -44,33 +63,31 @@ public class Controlador implements ActionListener
 			this.vista.agregarFilaAlaTabla(fila);
 		}
 
-		public void actionPerformed(ActionEvent e) 
-		{
-			if(e.getSource() == this.vista.getBtnAgregar())
+		private void abrirVentanaPersonaNueva() {
+			this.ventanaPersona = new VentanaPersona(this);			
+			this.mapaAcciones.put(ventanaPersona.getBtnAgregarPersona(), ()-> this.agregarPersonaNueva());
+			// FIXME la key se agrega cada vez que agrego una persona, una nueva venta genera un nuevo boton. Arreglarlo!
+		}
+		
+		private void agregarPersonaNueva() {
+			PersonaDTO nuevaPersona = new PersonaDTO(0,this.ventanaPersona.getTxtNombre().getText(), ventanaPersona.getTxtTelefono().getText());
+			this.agenda.agregarPersona(nuevaPersona);
+			this.llenarTabla();
+			this.ventanaPersona.dispose();
+		}
+		
+		private void borrarPersonas() {
+			int[] filas_seleccionadas = this.vista.getFilasSeleccionadas();
+			for (int fila : filas_seleccionadas)
 			{
-				this.ventanaPersona = new VentanaPersona(this);
+				this.agenda.borrarPersona(this.personas_en_tabla.get(fila));
 			}
-			else if(e.getSource() == this.vista.getBtnBorrar())
-			{
-				int[] filas_seleccionadas = this.vista.getFilasSeleccionadas();
-				for (int fila : filas_seleccionadas)
-				{
-					this.agenda.borrarPersona(this.personas_en_tabla.get(fila));
-				}
-				this.llenarTabla();
-			}
-			else if(e.getSource() == this.vista.getBtnReporte())
-			{				
-				ReporteAgenda reporte = new ReporteAgenda(agenda.obtenerPersonas());
-				reporte.mostrar();				
-			}
-			else if(e.getSource() == this.ventanaPersona.getBtnAgregarPersona())
-			{
-				PersonaDTO nuevaPersona = new PersonaDTO(0,this.ventanaPersona.getTxtNombre().getText(), ventanaPersona.getTxtTelefono().getText());
-				this.agenda.agregarPersona(nuevaPersona);
-				this.llenarTabla();
-				this.ventanaPersona.dispose();
-			}
+			this.llenarTabla();
+		}
+		
+		private void generarReporte() {
+			ReporteAgenda reporte = new ReporteAgenda(agenda.obtenerPersonas());
+			reporte.mostrar();				
 		}
 
 }
