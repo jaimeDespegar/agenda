@@ -5,7 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import persistencia.conexion.Conexion;
 import persistencia.dao.interfaz.PersonaDAO;
 import dto.PersonaDTO;
@@ -15,7 +16,8 @@ public class PersonaDAOSQL implements PersonaDAO
 	private static final String insert = "INSERT INTO personas(idPersona, nombre, telefono) VALUES(?, ?, ?)";
 	private static final String delete = "DELETE FROM personas WHERE idPersona = ?";
 	private static final String readall = "SELECT * FROM personas";
-		
+	private Logger log = LoggerFactory.getLogger(PersonaDAOSQL.class);
+	
 	public boolean insert(PersonaDTO persona)
 	{
 		PreparedStatement statement;
@@ -26,12 +28,12 @@ public class PersonaDAOSQL implements PersonaDAO
 			statement.setInt(1, persona.getIdPersona());
 			statement.setString(2, persona.getNombre());
 			statement.setString(3, persona.getTelefono());
-			if(statement.executeUpdate() > 0) //Si se ejecut� devuelvo true
+			if(statement.executeUpdate() > 0) //Si se ejecuto devuelvo true
 				return true;
 		} 
 		catch (SQLException e) 
 		{
-			e.printStackTrace();
+			log.error("Ocurrio un error al insertar la Persona: " + persona, e);
 		}
 		
 		return false;
@@ -47,12 +49,12 @@ public class PersonaDAOSQL implements PersonaDAO
 			statement = conexion.getSQLConexion().prepareStatement(delete);
 			statement.setString(1, Integer.toString(persona_a_eliminar.getIdPersona()));
 			chequeoUpdate = statement.executeUpdate();
-			if(chequeoUpdate > 0) //Si se ejecutó devuelvo true
+			if(chequeoUpdate > 0) //Si se ejecuto devuelvo true
 				return true;
 		} 
 		catch (SQLException e) 
 		{
-			e.printStackTrace();
+			log.error("Ocurrio un error al eliminar la Persona: " + persona_a_eliminar, e);
 		}
 		return false;
 	}
@@ -61,7 +63,7 @@ public class PersonaDAOSQL implements PersonaDAO
 	{
 		PreparedStatement statement;
 		ResultSet resultSet; //Guarda el resultado de la query
-		ArrayList<PersonaDTO> personas = new ArrayList<PersonaDTO>();
+		List<PersonaDTO> personas = new ArrayList<PersonaDTO>();
 		Conexion conexion = Conexion.getConexion();
 		try 
 		{
@@ -75,7 +77,7 @@ public class PersonaDAOSQL implements PersonaDAO
 		} 
 		catch (SQLException e) 
 		{
-			e.printStackTrace();
+			log.error("Ocurrio un error al leer todas las personas.", e);
 		}
 		return personas;
 	}
