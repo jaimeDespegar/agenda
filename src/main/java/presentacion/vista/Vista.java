@@ -122,4 +122,21 @@ public class Vista
 	{
 		return nombreColumnas;
 	}
+
+	public void vaciarTablaPersonas() 
+	{
+		this.modelPersonas.setRowCount(0);
+		this.modelPersonas.setColumnCount(0);
+		this.modelPersonas.setColumnIdentifiers(nombreColumnas);
+	}
+
+	public void agregarFilaAlaTabla(Object[] fila) 
+	{
+		this.modelPersonas.addRow(fila);
+	}
+
+	public int[] getFilasSeleccionadas() 
+	{
+		return tablaPersonas.getSelectedRows();
+	}
 }

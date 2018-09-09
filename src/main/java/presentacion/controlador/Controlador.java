@@ -26,26 +26,24 @@ public class Controlador implements ActionListener
 			this.personas_en_tabla = null;
 		}
 		
-		public void inicializar()
-		{
+		public void inicializar() {
 			this.llenarTabla();
 			this.vista.show();
 		}
 		
 		private void llenarTabla()
 		{
-			this.vista.getModelPersonas().setRowCount(0); //Para vaciar la tabla
-			this.vista.getModelPersonas().setColumnCount(0);
-			this.vista.getModelPersonas().setColumnIdentifiers(this.vista.getNombreColumnas());
-			
+			this.vista.vaciarTablaPersonas();
 			this.personas_en_tabla = agenda.obtenerPersonas();
-			for (int i = 0; i < this.personas_en_tabla.size(); i ++)
-			{
-				Object[] fila = {this.personas_en_tabla.get(i).getNombre(), this.personas_en_tabla.get(i).getTelefono()};
-				this.vista.getModelPersonas().addRow(fila);
-			}			
+			this.personas_en_tabla.forEach(p -> agregarPersonaALaTabla(p) );
 		}
 		
+		private void agregarPersonaALaTabla(PersonaDTO persona) {
+			Object[] fila = { persona.getNombre(), 
+							  persona.getTelefono() };
+			this.vista.agregarFilaAlaTabla(fila);
+		}
+
 		public void actionPerformed(ActionEvent e) 
 		{
 			if(e.getSource() == this.vista.getBtnAgregar())
@@ -54,14 +52,12 @@ public class Controlador implements ActionListener
 			}
 			else if(e.getSource() == this.vista.getBtnBorrar())
 			{
-				int[] filas_seleccionadas = this.vista.getTablaPersonas().getSelectedRows();
-				for (int fila:filas_seleccionadas)
+				int[] filas_seleccionadas = this.vista.getFilasSeleccionadas();
+				for (int fila : filas_seleccionadas)
 				{
 					this.agenda.borrarPersona(this.personas_en_tabla.get(fila));
 				}
-				
 				this.llenarTabla();
-				
 			}
 			else if(e.getSource() == this.vista.getBtnReporte())
 			{				
